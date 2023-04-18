@@ -36,10 +36,10 @@ class ColumnStoreDisk: public ColumnStoreAbstract {
         void store(ofstream& outputStream, string column, string value);
 
         // Write a value to a file given the column and value strings
-        void store(string column, string value);
+        void store(string column, string value) override;
 
         // Write multiple values to multiple files given a buffer of columns and values
-        void storeAll(map<string, vector<string>> buffer);
+        void storeAll(unordered_map<string, vector<string>> buffer) override;
 
         // Append 4 bytes to the file representing an int
         void handleStoreInteger(ofstream& fileOutputStream, int value);
@@ -48,10 +48,10 @@ class ColumnStoreDisk: public ColumnStoreAbstract {
         void handleStoreFloat(ofstream& fileOutputStream, float value);
 
         // Filter a column by a predicate and return a list of row indexes that satisfy it
-        vector<int> filter(string column, function<bool(Object*)> predicate);
+        vector<int> filter(string column, bool predicate) override;
 
         // Filter a column by a predicate and a list of row indexes to check and return a list of row indexes that satisfy it
-        vector<int> filter(string column, function<bool(Object*)> predicate, vector<int> indexesToCheck);
+        vector<int> filter(string column, bool predicate, vector<int> indexesToCheck) override;
 
         // Get the maximum value(s) of a column from a list of row indexes to check and return a list of row indexes that have the maximum value
         vector<int> getMax(string column, vector<int> indexesToCheck);

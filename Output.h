@@ -22,6 +22,7 @@ class Output {
         // constructors
         Output();
         Output(time_t date, string station, int type, float value);
+        Output(Object date, string station, int type, float value);
 
         // getters
         time_t getDate();

@@ -47,10 +47,10 @@ class ColumnStoreAbstract {
         virtual void storeAll(unordered_map<string, vector<string>> buffer) = 0;
 
         // Scans all the indexes of the column and returns the indexes whose values match the predicate.
-        virtual vector<int> filter(string column, function<bool(Object)> predicate) = 0;
+        virtual vector<int> filter(string column, bool predicate) = 0;
 
         // Scans the given indexes of the column and returns the indexes whose values match the predicate.
-        virtual vector<int> filter(string column, function<bool(Object)> predicate, vector<int> indexesToCheck) = 0;
+        virtual vector<int> filter(string column, bool predicate, vector<int> indexesToCheck) = 0;
 
         // Scans the given indexes of the column and returns the indexes whose values are the largest among all the scanned values.
         //
@@ -87,13 +87,14 @@ class ColumnStoreAbstract {
 // A class representing an object that can hold different types of values
 class Object {
     public:
-        enum Type {NONE, STRING, INT, FLOAT, TIME};
+        enum Type {NONE, STRING, INT, FLOAT, TIME, BOOL};
 
         Type type;
         string sval;
         int ival;
         float fval;
         tm tval;
+        bool flag;
 
         Object();
 
@@ -104,6 +105,8 @@ class Object {
         Object(float f);
 
         Object(tm t);
+
+        Object(bool flag);
 };
 
 #endif

@@ -13,7 +13,7 @@
 class ColumnStoreDiskEnhanced : public ColumnStoreDisk {
 public:
     // Constructor
-    ColumnStoreDiskEnhanced(std::map<std::string, int> columnDataTypes);
+    ColumnStoreDiskEnhanced(std::unordered_map<std::string, int> columnDataTypes);
 
     // Override store method
     void store(std::ofstream& outputStream, std::string column, std::string value);

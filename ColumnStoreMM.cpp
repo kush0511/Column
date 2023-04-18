@@ -41,7 +41,7 @@ class ColumnStoreMM : public ColumnStoreAbstract {
         }
 
         // filter a column by a predicate and return the indexes of matching values
-        vector<int> filter(string column, function<bool(Object)> predicate) override {
+        vector<int> filter(string column, bool predicate) override {
             vector<int> results;
             if (isInvalidColumn(column)) {
                 cout << "Column is not registered with this column store." << endl;
@@ -50,7 +50,7 @@ class ColumnStoreMM : public ColumnStoreAbstract {
 
             for (int i = 0; i < data[column].size(); i++) {
                 Object value = data[column][i];
-                if (predicate(value)) {
+                if (predicate) {
                     results.push_back(i);
                 }
             }
@@ -58,7 +58,7 @@ class ColumnStoreMM : public ColumnStoreAbstract {
         }
 
         // filter a column by a predicate and return the indexes of matching values from a given list of indexes
-        vector<int> filter(string column, function<bool(Object)> predicate, vector<int> indexesToCheck) override {
+        vector<int> filter(string column, bool predicate, vector<int> indexesToCheck) {
             vector<int> results;
             if (isInvalidColumn(column)) {
                 cout << "Column is not registered with this column store." << endl;
@@ -67,7 +67,7 @@ class ColumnStoreMM : public ColumnStoreAbstract {
 
             for (int index : indexesToCheck) {
                 Object value = data[column][index];
-                if (predicate(value)) {
+                if (predicate) {
                     results.push_back(index);
                 }
             }
