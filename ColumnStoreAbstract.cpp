@@ -118,7 +118,7 @@ class ColumnStoreAbstract {
         virtual string getName() = 0;
 
         // Gets the value from a column based on the index.
-        virtual Object getValue(string column, int index) = 0;
+        virtual Object* getValue(string column, int index) = 0;
 
         // Prints the head of the data (i.e. from index 0) until the specified index.
         virtual void printHead(int until) = 0;
@@ -134,7 +134,7 @@ class ColumnStoreAbstract {
         Object castValueAccordingToColumnType(string column, string value) {
             try {
                 if (value == "" || value == "M") {
-                    return Object();
+                    return Object(value);
                 }
 
                 switch (columnDataTypes[column]) {
@@ -150,7 +150,6 @@ class ColumnStoreAbstract {
                 cout << e.what() << endl;
             }
 
-            return Object();
         }
 
         // Returns true if column data type is not a integer or float.
@@ -215,6 +214,9 @@ class Object {
 
         Object(float f) : type(FLOAT), fval(f) {}
 
-        Object(tm t) : type(TIME), tval(t) {}
+        Object(tm t) : type(TIME), tval(t) {}  
 
+    operator long() {return fval;}
+    operator int() {return ival;}
+    operator float() {return fval;}
 };

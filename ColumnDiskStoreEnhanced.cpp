@@ -7,6 +7,8 @@
 #include <thread>
 #include <mutex>
 #include "ColumnDiskStore.h"
+#include "Output.h"
+
 
 using namespace std;
 
@@ -58,40 +60,32 @@ class ColumnStoreDiskEnhanced : public ColumnStoreDisk {
         /**
          * {@inheritDoc}
          */
-        ColumnStoreDiskEnhanced(unordered_map<string, int> columnDataTypes) : ColumnStoreDisk(columnDataTypes) {}
+
+        ColumnStoreDiskEnhanced(unordered_map<string, int> columnDataTypes) : ColumnStoreDisk(columnDataTypes) {};
 
         /**
          * {@inheritDoc}
+         * 0 = Timestamp
+         * 1 = Station
+         * 2 = Id
+         * 3 = Temperature
+         * 4 = Humidity
          */
         void store(ofstream& outputStream, string column, string value) {
             try {
                 Object toStore = castValueAccordingToColumnType(column, value);
-                switch(columnDataTypes[column]) {
-                    case TIMESTAMP: {
-                        if (toStore == null) { handleStoreTimestamp(outputStream, NULL_TIMESTAMP); }
-                        else { handleStoreTimestamp(outputStream, (long)toStore);}
-                        break;
+                if (columnDataTypes[column] == 0) {
+                    handleStoreTimestamp(outputStream, toStore.TIME);
                     }
-
-                    case STATION: {
-                        if (toStore == null) { handleStoreStation(outputStream, NULL_STATION); }
-                        else { handleStoreStation(outputStream, (char) toStore);}
-                        break;
+                else if (columnDataTypes[column] == 1) {
+                    handleStoreStation(outputStream, toStore.STRING);
                     }
-
-                    case ID: {
-                        if (toStore == null) { handleStoreInteger(outputStream, INT_MIN); }
-                        else { handleStoreInteger(outputStream, (int) toStore); }
-                        break;
+                else if (columnDataTypes[column] == 2) {
+                    handleStoreInteger(outputStream, toStore.INT);
                     }
-
-                    case TEMPERATURE:
-                    case HUMIDITY: {
-                        if (toStore == null) { handleStoreFloat(outputStream, NAN); }
-                        else { handleStoreFloat(outputStream, (float)toStore); }
-                        break;
+                else if ((columnDataTypes[column] == 3) || (columnDataTypes[column] = 4)){
+                    handleStoreFloat(outputStream, toStore.FLOAT);
                     }
-                }
             } catch(exception& e) {
                 cerr << e.what() << endl;
             }
@@ -171,8 +165,8 @@ class ColumnStoreDiskEnhanced : public ColumnStoreDisk {
                 ifstream inputStream(getName()+"/Timestamp.store", ios::binary);
                 char buffer[BUFFER_SIZE];
                 int index = 0;
-                long startRange = chrono::system_clock::to_time_t(chrono::system_clock::from_time_t(0) + chrono::hours(8) + chrono::years(year - 1970));
-                long endRange = chrono::system_clock::to_time_t(chrono::system_clock::from_time_t(0) + chrono::hours(8) + chrono::years(year - 1969) - chrono::seconds(1));
+                long startRange = chrono::system_clock::to_time_t(chrono::system_clock::from_time_t(0) + chrono::hours(8));
+                long endRange = chrono::system_clock::to_time_t(chrono::system_clock::from_time_t(0) + chrono::hours(8) - chrono::seconds(1));
                 while (inputStream.read(buffer, BUFFER_SIZE)) {
                     for (int i = 0; i < BUFFER_SIZE; i += 8) {
                         long value = *(long*)(buffer + i);
@@ -359,7 +353,6 @@ class ColumnStoreDiskEnhanced : public ColumnStoreDisk {
                     time_t time = unixTimestamp;
                     tm* timestamp = localtime(&time);
                     if (daysAdded.find(timestamp->tm_mday) == daysAdded.end()) {
-                        results.push_back(Output(timestamp, station, type, value));
                         daysAdded.insert(timestamp->tm_mday);
                     }
                 }
@@ -375,7 +368,9 @@ class ColumnStoreDiskEnhanced : public ColumnStoreDisk {
          */
         void addToListSync(vector<Output>& list, vector<Output>& toAdd) {
             lock_guard<mutex> lock(mtx);
-            list.insert(list.end(), toAdd.begin(), toAdd.end());
+            vector<Output>::iterator it = list.begin(); // get an iterator pointing to the index
+            list.insert(it, toAdd.begin(), toAdd.end()); // insert the range of elements
+
         }
 
         mutex mtx;

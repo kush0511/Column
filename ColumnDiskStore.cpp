@@ -8,7 +8,6 @@
 #include <cfloat>
 #include <map>
 #include "ColumnStoreAbstract.h"
-#include "ColumnDiskStore.h"
 
 using namespace std;
 
@@ -28,10 +27,9 @@ class ColumnStoreDisk: public ColumnStoreAbstract {
 
         // Date time format string
         static const string DTFORMATSTRING;
-        unordered_map<string, int> columnDataTypes;
 
         // Constructor
-        ColumnStoreDisk(map<string, int> columnDataTypes) {
+        ColumnStoreDisk(unordered_map<string, int> columnDataTypes) : ColumnStoreAbstract(columnDataTypes){
             this->columnDataTypes = columnDataTypes;
             // Get the column headers from the map keys
             for (auto& pair : columnDataTypes) {
@@ -43,14 +41,14 @@ class ColumnStoreDisk: public ColumnStoreAbstract {
 
         // Write an appropriate value to the outputStream given the column string and value string
         void store(ofstream& outputStream, string column, string value) {
-            auto toAdd = castValueAccordingToColumnType(column, value);
+            Object* toAdd = &castValueAccordingToColumnType(column, value);
             switch(columnDataTypes[column]) {
                 case STRING_DATATYPE: {
                     // Get its string value, each datum separated by new line
                     if (toAdd == nullptr) {
                         outputStream << "M\n";
                     } else {
-                        outputStream << *static_cast<string*>(toAdd) << "\n";
+                        outputStream << *reinterpret_cast<string*>(toAdd) << "\n";
                     }
                     break;
                 }
@@ -58,7 +56,7 @@ class ColumnStoreDisk: public ColumnStoreAbstract {
                     if (toAdd == nullptr) {
                         outputStream << "M\n";
                     } else {
-                        outputStream << chrono::system_clock::to_time_t(*static_cast<chrono::system_clock::time_point*>(toAdd)) << "\n";
+                        outputStream << chrono::system_clock::to_time_t(*reinterpret_cast<chrono::system_clock::time_point*>(toAdd)) << "\n";
                     }
                     break;
                 }
@@ -293,7 +291,7 @@ class ColumnStoreDisk: public ColumnStoreAbstract {
         // Print the first n values of each column
         void printHead(int n) {
             try {
-                for (string& column : columnHeaders) {
+                for (const string& column : columnHeaders) {
                     cout << column << ": ";
                     if (isNotNumberDataType(column)) {
                         ifstream inputStream(getName() + "/" + column + ".store", ios::binary);
@@ -392,7 +390,7 @@ class ColumnStoreDisk: public ColumnStoreAbstract {
         //     vector<string> columnHeaders;
 
         //     // Cast a value string to an appropriate object according to the column data type
-        //     Object* castValueAccordingToColumnType(string column, string value) {
+        //     Object* too(string column, string value) {
         //         switch(columnDataTypes[column]) {
         //             case STRING_DATATYPE: return reinterpret_cast<Object*>(new string(value));
         //             case TIME_DATATYPE: return reinterpret_cast<Object*>(new chrono::system_clock::time_point(chrono::system_clock::from_time_t(stoi(value))));

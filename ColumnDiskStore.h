@@ -30,8 +30,7 @@ class ColumnStoreDisk: public ColumnStoreAbstract {
         static const string DTFORMATSTRING;
 
         // Constructor
-        using ColumnStoreAbstract::ColumnStoreAbstract;
-        ColumnStoreDisk(map<string, int> columnDataTypes);
+        ColumnStoreDisk(unordered_map<string, int> columnDataTypes);
 
         // Write an appropriate value to the outputStream given the column string and value string
         void store(ofstream& outputStream, string column, string value);
@@ -41,6 +40,12 @@ class ColumnStoreDisk: public ColumnStoreAbstract {
 
         // Write multiple values to multiple files given a buffer of columns and values
         void storeAll(map<string, vector<string>> buffer);
+
+        // Append 4 bytes to the file representing an int
+        void handleStoreInteger(ofstream& fileOutputStream, int value);
+
+        // Append 4 bytes to the file representing a float
+        void handleStoreFloat(ofstream& fileOutputStream, float value);
 
         // Filter a column by a predicate and return a list of row indexes that satisfy it
         vector<int> filter(string column, function<bool(Object*)> predicate);
