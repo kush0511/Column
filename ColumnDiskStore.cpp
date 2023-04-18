@@ -8,6 +8,7 @@
 #include <cfloat>
 #include <map>
 #include "ColumnStoreAbstract.h"
+#include "ColumnDiskStore.h"
 
 using namespace std;
 
@@ -27,6 +28,7 @@ class ColumnStoreDisk: public ColumnStoreAbstract {
 
         // Date time format string
         static const string DTFORMATSTRING;
+        unordered_map<string, int> columnDataTypes;
 
         // Constructor
         ColumnStoreDisk(map<string, int> columnDataTypes) {
@@ -36,6 +38,8 @@ class ColumnStoreDisk: public ColumnStoreAbstract {
                 columnHeaders.insert(pair.first);
             }
         }
+
+        
 
         // Write an appropriate value to the outputStream given the column string and value string
         void store(ofstream& outputStream, string column, string value) {
